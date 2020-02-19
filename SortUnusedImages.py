@@ -23,7 +23,6 @@ absolutePath = os.environ['PWD']
 
 print('开始检测原生项目中的图片……')
 
-
 def findPngFilesByModuleDirName(dirName) :
 	if os.path.isdir(dirName) :
 		for subName in os.listdir(dirName):
@@ -36,6 +35,13 @@ def findPngFilesByModuleDirName(dirName) :
 				fileName = filePath.replace('@2x.png','')
 				fileName = fileName.replace('@3x.png','')
 				fileName = fileName.replace(subfix,'')
+				fileName = fileName.replace('_zx','')
+				fileName = fileName.replace('_ty','')
+				allPicArr.add(fileName)
+			else:
+				fileName = filePath.replace(subfix,'')
+				fileName = fileName.replace('_zx','')
+				fileName = fileName.replace('_ty','')
 				allPicArr.add(fileName)
 		elif subfix in fileTypeArr:
 			allFilesArr.append(dirName)
@@ -46,84 +52,78 @@ for name in os.listdir(absolutePath):
 
 print('完成扫描原生项目中的图片')
 
-totalPngCount = len(allPicArr)
-
-if totalPngCount <= 0:
+if len(allPicArr) <= 0:
 	print('没有找到图片')
 	exit()
 
-print('总共找到了'+str(totalPngCount)+'个图片')
+print('\n总共找到了'+str(len(allPicArr))+'个图片\n')
 print('请耐心等待，正在校验哪些图片原生项目未使用……')
 
-totalFilesCount = len(allFilesArr)
-index = 1
-for file in allFilesArr:
-	try:
-		f = open(file, 'r',encoding='utf-8')
-		content = f.read()
-	except Exception as e:
-		continue
-	finally:
-		if f:
-			f.close()
 
-	tempArr = []
-	for picName in allPicArr:
-		if content.find(picName) != -1:
-			tempArr.append(picName)
+def rmoveExistPicFromAllFilesArray() : #从数组里移除存在的图片名
 
-	for object in tempArr:
-		allPicArr.remove(object)
+	totalFilesCount = len(allFilesArr)
+	index = 1
+	for file in allFilesArr:
+	    try:
+	        f = open(file, 'r',encoding='utf-8')
+	        content = f.read()
+	    except Exception as e:
+	        continue
+	    finally:
+	        if f:
+	            f.close()
 
-	print("\r[{0}] {1} / {2} ".format('当前进度',str(index),str(totalFilesCount)),end='',flush=True)
-	index +=1
+	    tempArr = []
+	    for picName in allPicArr:
+	        if content.find(picName) != -1:
+	            tempArr.append(picName)
 
-print('\n原生检测完成')
+	    for object in tempArr:
+	        allPicArr.remove(object)
 
-rnPath = input('以上只是检测了原生项目，有些原生未使用图片可能在RN项目中使用，如不需要检测，按enter键结束。\n如需检测，请输入RN项目文件路径：')
+	    print("\r[{0}] {1} / {2} ".format('当前进度',str(index),str(totalFilesCount)),end='',flush=True)
+	    index +=1	
 
-print(rnPath)
-
-if len(rnPath) <= 0 :
-    print('未使用的图片可能有：\n%s \n请谨慎删除'%allPicArr)
-    exit()
-
-jsFileArr = []
-def findJSFilesByModuleDirName(dirName) :
+def findFilesByModuleDirName(dirName,fileLastP) :
 	dirName = dirName.replace(' ','')
 	if os.path.isdir(dirName):
 		for subName in os.listdir(dirName):
-			findJSFilesByModuleDirName(dirName+'/'+subName)
+			findFilesByModuleDirName(dirName+'/'+subName,fileLastP)
 	elif os.path.isfile(dirName) :
 		subfix = os.path.splitext(dirName)[1]
-		if subfix == '.js':
-			jsFileArr.append(dirName)
+		if subfix == fileLastP:
+			allFilesArr.append(dirName)
 
-findJSFilesByModuleDirName(rnPath)
+rmoveExistPicFromAllFilesArray()
+print('\n当前目录未使用图片已经扫描完成')
 
-totalFilesCount = len(jsFileArr)
-index = 1
-for file in jsFileArr:
-    try:
-        f = open(file, 'r',encoding='utf-8')
-        content = f.read()
-    except Exception as e:
-        continue
-    finally:
-        if f:
-            f.close()
 
-    tempArr = []
-    for picName in allPicArr:
-        if content.find(picName) != -1:
-            tempArr.append(picName)
+while True:
+	otherPath = input('\n是否需要检测其他原生模块使用了以上的图片,如不需要检测，按enter键结束。\n如需检测，请输入其他模块文件夹路径：')
+	if len(otherPath) > 0:
+		allFilesArr = []
+		findFilesByModuleDirName(otherPath,'.m')
+		rmoveExistPicFromAllFilesArray()
+		print('\n当前目录未使用图片已经扫描完成')
+		print('\n当前未使用图片为：'+str(len(allPicArr))+'个')
+	else:
+		break
 
-    for object in tempArr:
-        allPicArr.remove(object)
+print('\n原生检测完成')
 
-    print("\r[{0}] {1} / {2} ".format('当前进度',str(index),str(totalFilesCount)),end='',flush=True)
-    index +=1
+while True:
+	rnPath = input('\n有些原生未使用图片可能在RN项目中使用，如不需要检测，按enter键结束。\n如需检测，请输入RN项目文件路径：')
+	if len(rnPath) <= 0 :
+		break
+	else :
+		allFilesArr = []
+		findFilesByModuleDirName(rnPath,'.js')
+		rmoveExistPicFromAllFilesArray()
+		print('\n当前目录未使用图片已经扫描完成')
+		print('\n当前未使用图片为：'+str(len(allPicArr))+'个')
 
 print('检测完成')
 print('总共找到了'+str(len(allPicArr))+'个图片')
 print('未使用的图片可能有：\n%s \n请谨慎删除'%allPicArr)
+
