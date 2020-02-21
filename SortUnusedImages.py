@@ -96,6 +96,7 @@ def findFilesByModuleDirName(dirName,fileLastP) :
 			allFilesArr.append(dirName)
 
 rmoveExistPicFromAllFilesArray()
+print('\n当前未使用图片为：'+str(len(allPicArr))+'个')
 print('\n当前目录未使用图片已经扫描完成')
 
 
