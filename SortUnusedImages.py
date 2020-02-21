@@ -92,7 +92,7 @@ def findFilesByModuleDirName(dirName,fileLastP) :
 			findFilesByModuleDirName(dirName+'/'+subName,fileLastP)
 	elif os.path.isfile(dirName) :
 		subfix = os.path.splitext(dirName)[1]
-		if subfix == fileLastP:
+		if subfix in fileLastP:
 			allFilesArr.append(dirName)
 
 rmoveExistPicFromAllFilesArray()
@@ -104,7 +104,7 @@ while True:
 	otherPath = input('\n是否需要检测其他原生模块使用了以上的图片,如不需要检测，按enter键结束。\n如需检测，请输入其他模块文件夹路径：')
 	if len(otherPath) > 0:
 		allFilesArr = []
-		findFilesByModuleDirName(otherPath,'.m')
+		findFilesByModuleDirName(otherPath,fileTypeArr)
 		rmoveExistPicFromAllFilesArray()
 		print('\n当前目录未使用图片已经扫描完成')
 		print('\n当前未使用图片为：'+str(len(allPicArr))+'个')
@@ -119,7 +119,7 @@ while True:
 		break
 	else :
 		allFilesArr = []
-		findFilesByModuleDirName(rnPath,'.js')
+		findFilesByModuleDirName(rnPath,['.js'])
 		rmoveExistPicFromAllFilesArray()
 		print('\n当前目录未使用图片已经扫描完成')
 		print('\n当前未使用图片为：'+str(len(allPicArr))+'个')
